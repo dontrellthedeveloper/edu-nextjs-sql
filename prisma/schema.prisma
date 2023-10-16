@@ -7,7 +7,6 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
-
 }
 
 model Course {
@@ -18,14 +17,17 @@ model Course {
   imageUrl String? @db.Text
   price Float?
   isPublished Boolean @default(false)
+
   categoryId String?
   category Category? @relation(fields: [categoryId], references: [id])
+
+  chapters Chapter[]
   attachments Attachment[]
-    chapters Chapter[]
-      purchases Purchase[]
+  purchases Purchase[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@index([categoryId])
   @@fulltext([title])
 }
@@ -40,13 +42,15 @@ model Attachment {
   id String @id @default(uuid())
   name String
   url String @db.Text
+
   courseId String
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@index([courseId])
 }
-
 
 model Chapter {
   id String @id @default(uuid())
@@ -56,12 +60,17 @@ model Chapter {
   position Int
   isPublished Boolean @default(false)
   isFree Boolean @default(false)
+
   muxData MuxData?
+
   courseId String
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
   userProgress UserProgress[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@index([courseId])
 }
 
@@ -69,6 +78,7 @@ model MuxData {
   id String @id @default(uuid())
   assetId String
   playbackId String?
+
   chapterId String @unique
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }
@@ -76,11 +86,15 @@ model MuxData {
 model UserProgress {
   id String @id @default(uuid())
   userId String
+
   chapterId String
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
   isCompleted Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@index([chapterId])
   @@unique([userId, chapterId])
 }
@@ -88,10 +102,14 @@ model UserProgress {
 model Purchase {
   id String @id @default(uuid())
   userId String
+
   courseId String
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
+
+  @@unique([userId, courseId])
   @@index([courseId])
 }
 
@@ -99,8 +117,7 @@ model StripeCustomer {
   id String @id @default(uuid())
   userId String @unique
   stripeCustomerId String @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-
